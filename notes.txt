@@ -1,0 +1,81 @@
+Abstract Algebra Summary:
+
+1. Semigroup
+  A set of elements for which there is an operation that is both closed and associative.
+  A closed operation is an operation that takes two elements from a set and returns
+  another element from the set. 
+  The operation is associative if it produces the same result regardless of how consecutive
+  calls to the operation are grouped.   
+
+2. Monoid
+  A semigroup with the additional requirement of an identity element in the set.
+  An identity element is an element that, if used in the closed associative operation with
+  a second element, will return the second element unchanged.
+
+3. Group:
+  A monoid where every element in the set has a corresponding inverse in the set.
+  An inverse for any given element is another element that, 
+  if called with the element in the operation, will return the identity element.
+
+4. Commutative Group:
+  A group where the operation is also commutative, meaning that changing the ordering of the
+  elements when calling the operation does not change the result.
+
+5. Ring:
+  A commutative group with a second operation, typically referred to
+   as a "multiplicative" operation, to contrast the group level operation which is typically
+  referred to as "additive". This multiplicative operation is only required to be closed and 
+  associative, and there must also be an identity element in the set. Essentially,
+  this multiplicative operation forms a monoid for the set. Lastly, these two operations
+  must share a distributive relationship, meaning that:
+  a x (b + c) = (a x b) + (a x c)
+  (a + b) x c = (a x c) + (b x c) 
+
+6. Units in a Ring:
+  A subset of elements in a ring that have inverses under the multiplicative operation.
+  The units of a ring form a group.
+
+Haskell Code Summary:
+
+- We only export the type GroupOfUnits but not the constructor, and then also export a
+  groupOfUnits function that creates a value of type GroupOfUnits. This pattern is known as
+  a "smart constructor" and restricts those who import this module to only create a value 
+  of type GroupOfUnits via the groupOfUnits function. This ensures extra restrictions on 
+  the values of type GroupOfUnits because a function can enforce more guarantees about 
+  the values produced beyond what can be restricted at the value constructor level.
+
+- The first goal of this assignment is to create a groupOfUnits function that will 
+  produce a value of type "GroupOfUnits a" given a type "a" that is restricted to the 
+  type classes Ring, Bounded, and Enum. A value of type "GroupOfUnits a" contains
+  two parts: 1) the set of all elements in the Ring with corresponding inverses in that
+  same set under the function Ring.*, and 2) a map each unit and their inverse.
+  
+  Notes: I could not figure out a way to create the map of inverses without additionally 
+  restricting the type "a" to the Ord type class. It seems as though most of the 
+  functions defined in Data.Map require the Ord typeclass. Please let me know if there
+  is a way to avoid this.
+
+- The second goal of this assignment is to make the type "UnitGroupElem a" an instance
+  of the Group typeclass. There is only one constructor for a value of type 
+  "UnitGroupElem a", which creates a value that contains a "GroupOfUnits a" value
+  as well as the value of an individual unit element. Per the Data.Group documentation,
+  the Group typeclass requires a definition of an invert function for any type that is to
+  be made an instance for the Group typeclass. The invert function takes an element of
+  the group and returns its inverse. To define invert for a "UnitGroupElem a" value,
+  I wrote a function that takes a "UnitGroupElem a" value and returns the inverse of
+  that value by looking it up in the _inverses map in the accompanying "GroupOfUnits a".
+
+  Notes: 1) I could not get my instance definition to satisfy the compiler. I am getting 
+  an error message that states, "Could not deduce (Monoid (UnitGroupElem a)) arising 
+  from the superclasses of an instance declaration from the context." I am guessing this
+  is related to your comment about defining the monoid operation as the multiplication of
+  the ring a. In attempts to satisfy this requirement of the compiler, I tried writing
+  a Monoid instance defintion for "UnitGroupElem a" where mappend was Ring.* and mempty
+  was Ring.one, however, this led me down a rabbit hole of other compiler errors,
+  so I abandoned this path under the assumption that I have made a mistake somewhere that 
+  is causing this compiler error. I left my attempted Monoid instance definition commented
+  out on lines 31-32 for reference. 2) Much like the groupOfUnits function, I had to add the 
+  Ord typeclass to the Group instance definition in order to use Map.lookup to find the inverse
+  of the provided value. 3) I don't think the way I'm looking up the inverse of the provided 
+  value with Map.lookup, which returns a Maybe, is ideal, but I wasn't sure what to do in the 
+  case where the provided value had no inverse, so I'm just throwing an error.
