@@ -33,7 +33,7 @@ groupOfUnits =
         Map.fromList $ inversePairs ++ map (\(a, b) -> (b, a)) inversePairs
    in GroupOfUnits {_elems = units, _inverses = inversesMap}
   where
-    areInverses (a, b) = a Ring .* b == b Ring .* a && a Ring .* b == Ring.one
+    areInverses (a, b) = a Ring.* b == b Ring.* a && a Ring.* b == Ring.one
     getAllPairs [] = []
     getAllPairs [_] = []
     getAllPairs (x:xs) = [(x, y) | y <- xs] ++ getAllPairs xs
