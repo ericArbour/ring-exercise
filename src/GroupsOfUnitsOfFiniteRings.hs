@@ -33,25 +33,26 @@ groupOfUnits =
         Map.fromList $ inversePairs ++ map (\(a, b) -> (b, a)) inversePairs
    in GroupOfUnits {_elems = units, _inverses = inversesMap}
   where
-    areInverses (a, b) = a Ring.* b == b Ring.* a && a Ring.* b == Ring.one
+    areInverses (a, b) =
+      a Ring.* b == b Ring.* a && a Ring.* b == Ring.one
     getAllPairs [] = []
     getAllPairs [_] = []
     getAllPairs (x:xs) = [(x, y) | y <- xs] ++ getAllPairs xs
 
 instance (Ring.C a, Ord a, Bounded a, Enum a) =>
          Semigroup (UnitGroupElem a) where
-  (UnitGroupElem grpOfUnits a) <> (UnitGroupElem _ b) =
-    UnitGroupElem grpOfUnits (a Ring.* b)
+  (UnitGroupElem group a) <> (UnitGroupElem _ b) =
+    UnitGroupElem group (a Ring.* b)
 
 instance (Ring.C a, Ord a, Bounded a, Enum a) => Monoid (UnitGroupElem a) where
   mempty = UnitGroupElem groupOfUnits Ring.one
 
 -- Why is (UnitGroupElem a) a group, defining the monoid operation as the multiplication of the ring a?
 instance (Ring.C a, Ord a, Bounded a, Enum a) => Group (UnitGroupElem a) where
-  invert (UnitGroupElem groups a) = UnitGroupElem groups inverse
+  invert (UnitGroupElem group a) = UnitGroupElem group inverse
     where
       inverse =
-        case Map.lookup a $ _inverses groups of
+        case Map.lookup a $ _inverses group of
           Nothing -> error "No inverse"
           Just val -> val
 -- assume that GroupOfUnits is a value of groupOfUnits;
