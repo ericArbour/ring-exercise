@@ -38,11 +38,16 @@ groupOfUnits =
     getAllPairs [_] = []
     getAllPairs (x:xs) = [(x, y) | y <- xs] ++ getAllPairs xs
 
--- instance ( Ring.C a, Ord a ) => Monoid (UnitGroupElem a) where
---  mappend = (Ring.*)
---  mempty = Ring.one
+instance (Ring.C a, Ord a, Bounded a, Enum a) =>
+         Semigroup (UnitGroupElem a) where
+  (UnitGroupElem grpOfUnits a) <> (UnitGroupElem _ b) =
+    UnitGroupElem grpOfUnits (a Ring.* b)
+
+instance (Ring.C a, Ord a, Bounded a, Enum a) => Monoid (UnitGroupElem a) where
+  mempty = UnitGroupElem groupOfUnits Ring.one
+
 -- Why is (UnitGroupElem a) a group, defining the monoid operation as the multiplication of the ring a?
-instance (Ring.C a, Ord a) => Group (UnitGroupElem a) where
+instance (Ring.C a, Ord a, Bounded a, Enum a) => Group (UnitGroupElem a) where
   invert (UnitGroupElem groups a) = UnitGroupElem groups inverse
     where
       inverse =
